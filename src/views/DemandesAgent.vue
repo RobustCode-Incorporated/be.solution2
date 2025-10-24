@@ -1,27 +1,30 @@
 <template>
   <div class="page-demandes-agent">
+    <!-- Navbar -->
     <header class="navbar">
       <div class="navbar-left">
-        <img src="../assets/logo_rdc.png" alt="Logo RDC" class="logo" />
+        <img src="../assets/RobustCodelogowhite.png" alt="Logo BE Solution" class="logo" />
         <h1>Demandes à traiter</h1>
       </div>
       <div class="navbar-right">
-        <router-link to="/dashboard" class="nav-btn">Dashboard</router-link>
+        <router-link to="/dashboard" class="nav-btn">Tableau de bord</router-link>
         <button @click="logout" class="logout-btn">Déconnexion</button>
       </div>
     </header>
 
+    <!-- Filtres -->
     <section class="controls">
       <input v-model="q" @input="applyFilters" placeholder="Rechercher par citoyen, type..." />
       <select v-model="filterStatut" @change="applyFilters">
-        <option value="">Tous statuts</option>
+        <option value="">Tous les statuts</option>
         <option v-for="s in statuts" :key="s.id" :value="s.id">{{ s.nom }}</option>
       </select>
-      <button @click="fetchDemandes">Rafraîchir</button>
+      <button @click="fetchDemandes" class="refresh-btn">Rafraîchir</button>
     </section>
 
     <section v-if="loading" class="loading">Chargement...</section>
 
+    <!-- Table des demandes -->
     <section v-else>
       <table class="table-demandes">
         <thead>
@@ -49,6 +52,7 @@
         </tbody>
       </table>
 
+      <!-- Pagination -->
       <div class="pagination" v-if="pages > 1">
         <button :disabled="page === 1" @click="page-- && applyFilters()">←</button>
         <span>Page {{ page }} / {{ pages }}</span>
@@ -124,7 +128,7 @@ export default {
     async fetchStatuts() {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:4001/api/statuts", {
+        const res = await axios.get("https://be-solution-backend.onrender.com/api/statuts", {
           headers: { Authorization: `Bearer ${token}` }
         });
         this.statuts = res.data;
@@ -136,15 +140,14 @@ export default {
       this.loading = true;
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:4001/api/agents/assigned-demandes", {
+        const res = await axios.get("https://be-solution-backend.onrender.com/api/agents/assigned-demandes", {
           headers: { Authorization: `Bearer ${token}` }
         });
-        console.log("Demandes reçues :", res.data);
         this.demandes = res.data.filter(d => d && d.id);
         this.page = 1;
       } catch (err) {
         console.error("Erreur chargement demandes:", err);
-        alert("Erreur chargement demandes.");
+        alert("Erreur chargement des demandes.");
       } finally {
         this.loading = false;
       }
@@ -154,7 +157,6 @@ export default {
     },
     openDetails(id) {
       if (!id) {
-        console.warn("ID invalide passé à openDetails:", id);
         alert("Impossible d’ouvrir le détail : ID invalide.");
         return;
       }
@@ -172,10 +174,15 @@ export default {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=ABeeZee&family=Inter&family=Ysabeau+Office&display=swap');
+
 .page-demandes-agent {
   font-family: "Inter", sans-serif;
-  padding: 20px;
+  padding: 24px;
+  background: #f9f9f9;
 }
+
+/* NAVBAR */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -184,6 +191,7 @@ export default {
   padding: 14px 24px;
   color: white;
   font-family: 'Ysabeau Office', sans-serif;
+  border-radius: 10px;
 }
 .navbar-left {
   display: flex;
@@ -191,33 +199,32 @@ export default {
   gap: 10px;
 }
 .logo {
-  height: 36px;
+  height: 40px;
   display: block;
 }
 .navbar-right {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex-wrap: nowrap;
 }
 .nav-btn {
-  color: #fff;
+  background: white;
+  color: #0E2C5A;
+  padding: 8px 14px;
+  border-radius: 8px;
+  font-weight: bold;
   text-decoration: none;
-  background: #0E2C5A;
-  padding: 6px 12px;
-  border-radius: 6px;
-  font-weight: 600;
-  transition: background 0.3s ease;
+  transition: background 0.3s;
 }
 .nav-btn:hover {
-  background: #0E2C5A;
+  background: #f1f1f1;
 }
 .logout-btn {
   background: #d9534f;
   border: none;
   color: #fff;
-  padding: 6px 12px;
-  border-radius: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
   cursor: pointer;
   font-weight: 600;
   transition: background 0.3s ease;
@@ -225,22 +232,36 @@ export default {
 .logout-btn:hover {
   background: #b52b27;
 }
+
+/* CONTROLS */
 .controls {
-  margin: 16px 0;
+  margin: 20px 0;
   display: flex;
-  gap: 10px;
+  gap: 12px;
   align-items: center;
+  flex-wrap: wrap;
 }
-input {
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #ccc;
-}
+input,
 select {
-  padding: 8px;
-  border-radius: 4px;
+  padding: 10px;
+  border-radius: 8px;
   border: 1px solid #ccc;
+  font-family: "ABeeZee", sans-serif;
 }
+.refresh-btn {
+  background: #104B71;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: bold;
+}
+.refresh-btn:hover {
+  background: #0E2C5A;
+}
+
+/* TABLE */
 .table-demandes {
   width: 100%;
   border-collapse: collapse;
@@ -253,25 +274,45 @@ select {
   text-align: left;
 }
 .table-demandes th {
-  background: #003da5;
-  color: #fff;
+  background: #0E2C5A;
+  color: white;
 }
 button {
+  background: #104B71;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+button:hover {
   background: #0E2C5A;
-  color: #fff;
+}
+.empty {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+}
+
+/* PAGINATION */
+.pagination {
+  margin-top: 16px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
+}
+.pagination button {
+  background: #104B71;
+  color: white;
   border: none;
   padding: 6px 10px;
   border-radius: 6px;
   cursor: pointer;
 }
-.empty {
-  text-align: center;
-  color: #666;
-}
-.pagination {
-  margin-top: 12px;
-  display: flex;
-  gap: 8px;
-  align-items: center;
+.pagination button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
 }
 </style>

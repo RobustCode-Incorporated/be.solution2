@@ -1,12 +1,12 @@
 <template>
   <div class="login-container">
-    <!-- Bloc gauche -->
+    <!-- Bloc gauche (branding) -->
     <div class="left-panel">
-      <img src="../assets/RobustCodelogowhite.png" alt="Logo Robust Code" class="logo" />
+      <img src="../assets/RobustCodelogowhite.png" alt="Logo BE Solution" class="logo" />
       <h1 class="title">ROBUST ADMINISTRATIVE SYSTEM</h1>
     </div>
 
-    <!-- Bloc droit -->
+    <!-- Bloc droit (formulaire) -->
     <div class="right-panel">
       <h1 class="form-title">Connexion Agent</h1>
       <form class="login-form" @submit.prevent="login">
@@ -56,7 +56,7 @@ export default {
       this.loading = true;
       this.error = "";
       try {
-        const res = await axios.post("http://localhost:4001/api/agents/login", {
+        const res = await axios.post("https://be-solution-backend.onrender.com/api/agents/login", {
           username: this.username,
           password: this.password,
         });

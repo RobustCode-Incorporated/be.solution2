@@ -3,11 +3,10 @@
     <!-- Navbar -->
     <header class="navbar">
       <div class="navbar-left">
-        <img src="../assets/RobustCodelogowhite.png" alt="Logo RDC" class="logo" />
+        <img src="../assets/RobustCodelogowhite.png" alt="Logo Robust Code" class="logo" />
         <h1>Tableau de bord Agent</h1>
       </div>
       <div class="navbar-right">
-        <!-- Boutons de navigation vers les pages demandes -->
         <router-link to="/demandes" class="nav-btn">Toutes les demandes</router-link>
         <button @click="logout" class="logout-btn">Déconnexion</button>
       </div>
@@ -16,12 +15,16 @@
     <!-- Statistiques -->
     <section class="stats">
       <div class="stat-card">
-        <h2>{{ stats.totalDemandes }}</h2>
+        <h2>{{ stats.demandesSoumises }}</h2>
         <p>Demandes à traiter</p>
       </div>
       <div class="stat-card">
-        <h2>{{ stats.demandesTraitees }}</h2>
-        <p>Demandes traitées</p>
+        <h2>{{ stats.demandesEnTraitement }}</h2>
+        <p>Demandes en traitement</p>
+      </div>
+      <div class="stat-card">
+        <h2>{{ stats.demandesValidees }}</h2>
+        <p>Demandes validées</p>
       </div>
     </section>
 
@@ -42,11 +45,14 @@
           <tr v-for="demande in demandes" :key="demande.id">
             <td>{{ getTypeDemandeLabel(demande.typeDemande) }}</td>
             <td>{{ formatNomComplet(demande.citoyen) }}</td>
-            <td>{{ getStatutLabel(demande.statut.nom) }}</td>
+            <td>{{ getStatutLabel(demande.statut?.nom) }}</td>
             <td>{{ formatDate(demande.createdAt) }}</td>
             <td>
               <button @click="goToDetail(demande.id)" class="detail-btn">Voir</button>
             </td>
+          </tr>
+          <tr v-if="demandes.length === 0">
+            <td colspan="5" class="empty">Aucune demande disponible</td>
           </tr>
         </tbody>
       </table>
@@ -62,8 +68,9 @@ export default {
   data() {
     return {
       stats: {
-        totalDemandes: 0,
-        demandesTraitees: 0,
+        demandesSoumises: 0,
+        demandesEnTraitement: 0,
+        demandesValidees: 0,
       },
       demandes: [],
       selectedDemandeId: null,
@@ -73,9 +80,12 @@ export default {
     async fetchStats() {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:4001/api/agents/dashboard", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(
+          "https://be-solution-backend.onrender.com/api/agents/dashboard",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         this.stats = res.data;
       } catch (err) {
         console.error("Erreur chargement stats agent", err);
@@ -84,9 +94,12 @@ export default {
     async fetchDemandes() {
       try {
         const token = localStorage.getItem("token");
-        const res = await axios.get("http://localhost:4001/api/agents/assigned-demandes", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(
+          "https://be-solution-backend.onrender.com/api/agents/assigned-demandes",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         this.demandes = res.data;
       } catch (err) {
         console.error("Erreur chargement demandes", err);
@@ -133,7 +146,9 @@ export default {
 </script>
 
 <style scoped>
-/* Navbar */
+@import url('https://fonts.googleapis.com/css2?family=ABeeZee&family=Inter&family=Ysabeau+Office&display=swap');
+
+/* NAVBAR */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -149,7 +164,7 @@ export default {
   gap: 10px;
 }
 .logo {
-  height: 40px;
+  height: 42px;
 }
 .navbar-right {
   display: flex;
@@ -160,10 +175,12 @@ export default {
   background: white;
   color: #0E2C5A;
   padding: 8px 14px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: bold;
   text-decoration: none;
   cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  transition: background 0.3s;
 }
 .nav-btn:hover {
   background: #f1f1f1;
@@ -172,64 +189,95 @@ export default {
   background: white;
   color: #0E2C5A;
   padding: 8px 14px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-weight: bold;
   border: none;
   cursor: pointer;
+  font-family: 'Inter', sans-serif;
 }
 .logout-btn:hover {
   background: #f1f1f1;
 }
 
-/* Stats */
+/* STATS */
 .stats {
   display: flex;
   gap: 20px;
-  margin: 20px;
+  margin: 30px 20px;
+  flex-wrap: wrap;
 }
 .stat-card {
   background: white;
-  padding: 20px;
-  border-radius: 10px;
+  padding: 24px;
+  border-radius: 14px;
   flex: 1;
   text-align: center;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
 }
 .stat-card h2 {
-  font-size: 28px;
+  font-size: 30px;
   color: #0E2C5A;
+  font-family: 'Ysabeau Office', sans-serif;
 }
 .stat-card p {
-  font-size: 14px;
+  font-size: 15px;
   color: #666;
+  font-family: 'ABeeZee', sans-serif;
 }
 
-/* Table */
+/* TABLE */
 .demandes {
-  margin: 20px;
+  margin: 30px 20px;
+}
+.demandes h3 {
+  color: #0E2C5A;
+  font-family: 'Ysabeau Office', sans-serif;
+  margin-bottom: 14px;
 }
 table {
   width: 100%;
   border-collapse: collapse;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
 }
-th,
-td {
-  padding: 10px;
-  border: 1px solid #ddd;
+th, td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #eee;
+  font-family: 'ABeeZee', sans-serif;
 }
 th {
   background: #0E2C5A;
   color: white;
+  font-family: 'Inter', sans-serif;
 }
+tr:nth-child(even) {
+  background: #f9f9f9;
+}
+
+/* BOUTONS */
 .detail-btn {
-  background: #0E2C5A;
+  background: #104B71;
   color: white;
   padding: 6px 12px;
-  border-radius: 5px;
+  border-radius: 6px;
   border: none;
   cursor: pointer;
+  font-family: 'Inter', sans-serif;
+  font-weight: bold;
+  transition: background 0.3s;
 }
 .detail-btn:hover {
   background: #0E2C5A;
+}
+
+/* MESSAGE */
+.empty {
+  text-align: center;
+  padding: 20px;
+  font-style: italic;
+  color: #666;
 }
 </style>
